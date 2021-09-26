@@ -25,9 +25,6 @@ var lateral_vel: Vector3 = Vector3()
 # Death
 signal death
 
-func _ready() -> void:
-	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
-
 func _physics_process(delta: float) -> void:
 	# Check angle difference between current velocity and downhill
 	var angle_diff: float = downhill.angle_to(velocity)

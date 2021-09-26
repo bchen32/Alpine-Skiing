@@ -12,8 +12,10 @@ export var first_flag_dist: int = 30
 export var min_flag_dist: int = 100
 export var max_flag_dist: int = 200
 
-export var min_horiz: int = -80
-export var max_horiz: int = 80
+export var fence_size: int = 2
+
+export var min_horiz: int = -60
+export var max_horiz: int = 60
 
 export var obstacle_offset_dist: int = 200
 export var obstacle_delete_dist: int = 100
@@ -28,6 +30,10 @@ var flag_scene: PackedScene = preload('res://Scenes/InstanceScenes/FlagPair.tscn
 var flags: Array = []
 var next_flag_dist: int = first_flag_dist
 
+var fence_scene: PackedScene = preload('res://Scenes/InstanceScenes/Fence.tscn')
+var fences: Array = []
+var next_fence_dist: int = fence_size
+
 var dist_traveled: float = 0
 
 # Debug vars
@@ -36,8 +42,11 @@ export var debug_freq: int = 600
 var debug_frame: int = 0
 
 func _ready() -> void:
+	# Setup
 	player.connect('death', self, '_on_player_death')
+	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	rand.randomize()
+	# Generate initial obstacles
 	if camera == 0:
 		$Player/Camera.current = true
 	elif camera == 1:
@@ -45,7 +54,6 @@ func _ready() -> void:
 
 func _on_player_death() -> void:
 	# Stop everything
-	print('Dead')
 	player.velocity = Vector3()
 	for rock in rocks:
 		rock.velocity = Vector3()
@@ -98,14 +106,11 @@ func _process(delta: float) -> void:
 	var flags_to_delete: Array = []
 	for flag in flags:
 		flag.velocity = -player.downhill_vel
-		print((-player.downhill * obstacle_delete_dist).z)
-		print(flag.transform.origin.z)
 		if (-player.downhill * obstacle_delete_dist).z - flag.transform.origin.z < 0:
 			flags_to_delete.append(flag)
 	for flag in flags_to_delete:
 		flags.erase(flag)
 		flag.queue_free()
-		print('Flag deleted')
 #	debug_frame += 1
 #	if debug_frame == debug_freq:
 #		debug_frame = 0
