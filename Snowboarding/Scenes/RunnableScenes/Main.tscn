@@ -6,10 +6,9 @@
 
 [node name="Main" type="Spatial"]
 script = ExtResource( 3 )
-camera = 1
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 47.75, 80 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 50 )
 
 [node name="Hill" parent="." instance=ExtResource( 1 )]
 
