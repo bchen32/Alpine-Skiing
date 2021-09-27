@@ -74,19 +74,19 @@ margin_bottom = 14.0
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 
 [node name="Mountain1" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, -100, -1200 )
+transform = Transform( 1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, -2000 )
 
 [node name="Mountain2" parent="." instance=ExtResource( 4 )]
-transform = Transform( 838.385, 0, -545.078, 0, 1000, 0, 545.078, 0, 838.385, 968.22, -100, -1200 )
+transform = Transform( 838.385, 0, -545.078, 0, 1000, 0, 545.078, 0, 838.385, 968.22, 0, -2000 )
 
 [node name="Mountain3" parent="." instance=ExtResource( 4 )]
-transform = Transform( 304.366, 0, 952.555, 0, 1000, 0, -952.555, 0, 304.366, -917.048, -100, -1200 )
+transform = Transform( 304.366, 0, 952.555, 0, 1000, 0, -952.555, 0, 304.366, -917.048, 0, -2000 )
 
 [node name="Mountain4" parent="." instance=ExtResource( 4 )]
-transform = Transform( 891.125, 0, -453.757, 0, 1000, 0, 453.757, 0, 891.125, -1931.18, -100, -1200 )
+transform = Transform( 891.125, 0, -453.757, 0, 1000, 0, 453.757, 0, 891.125, -2165.1, 0, -2000 )
 
 [node name="Mountain5" parent="." instance=ExtResource( 4 )]
-transform = Transform( 988, 0, 154.452, 0, 1000, 0, -154.452, 0, 988, 1917.01, -100, -1200 )
+transform = Transform( 988, 0, 154.452, 0, 1000, 0, -154.452, 0, 988, 2109.99, 0, -2000 )
 
 [node name="Floor" parent="." instance=ExtResource( 5 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -500, -500 )

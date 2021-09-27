@@ -18,19 +18,20 @@ var gameover_text: String = 'You Died'
 export var width: int = 200
 
 # Procedural gen
-export var first_rock_dist: int = 0
+export var first_rock_dist: int = 40
 export var min_rock_dist: int = 10
-export var max_rock_dist: int = 50
+export var max_rock_dist: int = 30
 export var rock_margin: int = 10
 
 export var first_flag_dist: int = 30
-export var min_flag_dist: int = 100
-export var max_flag_dist: int = 200
-export var flag_margin: int = 40
+export var min_flag_dist: int = 120
+export var max_flag_dist: int = 180
+export var flag_margin: int = 30
 
 export var fence_size: int = 2
 
-export var tree_size: int = 20
+export var tree_size: int = 50
+export var tree_variance: int = 20
 export var tree_margin: int = 10
 
 export var obstacle_offset_dist: int = 1000
@@ -40,11 +41,11 @@ var rand = RandomNumberGenerator.new()
 
 export var rock_scene: PackedScene = preload('res://Scenes/InstanceScenes/Rock.tscn')
 var rocks: Array = []
-var next_rock_dist: int = first_rock_dist
+var next_rock_dist: int
 
 export var flag_scene: PackedScene = preload('res://Scenes/InstanceScenes/FlagPair.tscn')
 var flags: Array = []
-var next_flag_dist: int = first_flag_dist
+var next_flag_dist: int
 var flag_left: bool = true
 
 export var fence_scene: PackedScene = preload('res://Scenes/InstanceScenes/Fence.tscn')
@@ -83,12 +84,28 @@ func _input(event) -> void:
 			start()
 		else:
 			reset()
+			start()
+
+func start() -> void:
+#	print('Start')
+	game_started = true
+	# Start moving player
+	player.move = true
+	# Do similar for flags
+	for flag in flags:
+		flag.velocity = -player.downhill_vel
+	# Do similar for fences
+	for fence in fences:
+		fence.velocity = -player.downhill_vel
+	# Start score
+	score_timer.start()
+	# Hide title elements
+	title.visible = false
+	instruction.visible = false
+	return
 
 func reset() -> void:
-	# Reset player
-	player.reset()
-	player.transform.origin = player_start
-	dist_traveled = 0
+#	print('Reset')
 	# Delete obstacles and regenerate
 	for rock in rocks:
 		rock.queue_free()
@@ -107,7 +124,13 @@ func reset() -> void:
 	trees = []
 	next_tree_dist = 0
 	generate_initial_obstacles()
-	start()
+	# Reset player
+	player.reset()
+	player.transform.origin = player_start
+	dist_traveled = 0
+	# Reset score
+	score = 0
+	score_counter.text = '0'
 
 func generate_initial_obstacles() -> void:
 	# Generate starting flag
@@ -122,10 +145,11 @@ func generate_initial_obstacles() -> void:
 		var rock: KinematicBody = rock_scene.instance()
 		rock.transform.origin = Globals.downhill * i
 		rock.transform.origin += Vector3.RIGHT * rand.randi_range(-width / 2 + rock_margin, width / 2 - rock_margin)
-		i += rand.randi_range(min_rock_dist, max_rock_dist)
 		rock.connect('death', self, '_on_player_death')
 		rocks.append(rock)
 		add_child(rock)
+		i += rand.randi_range(min_rock_dist, max_rock_dist)
+	next_rock_dist = i - obstacle_offset_dist
 	# Generate initial flags
 	i = first_flag_dist + rand.randi_range(min_flag_dist, max_flag_dist)
 	while i < obstacle_offset_dist:
@@ -140,6 +164,7 @@ func generate_initial_obstacles() -> void:
 		add_child(flag)
 		i += rand.randi_range(min_flag_dist, max_flag_dist)
 		flag_left = !flag_left
+	next_flag_dist = i - obstacle_offset_dist
 	# Generate initial fences
 	i = 0
 	while i < obstacle_offset_dist:
@@ -159,8 +184,8 @@ func generate_initial_obstacles() -> void:
 	while i < obstacle_offset_dist:
 		var left_tree: Spatial = tree_scene.instance()
 		var right_tree: Spatial = tree_scene.instance()
-		left_tree.transform.origin = Globals.downhill * i - Vector3.RIGHT * (width / 2 + tree_margin)
-		right_tree.transform.origin = Globals.downhill * i + Vector3.RIGHT * (width / 2 + tree_margin)
+		left_tree.transform.origin = Globals.downhill * (i + rand.randi_range(-tree_variance, tree_variance)) - Vector3.RIGHT * (width / 2 + tree_margin)
+		right_tree.transform.origin = Globals.downhill * (i + rand.randi_range(-tree_variance, tree_variance)) + Vector3.RIGHT * (width / 2 + tree_margin)
 		left_tree.rotate_x(Globals.slope_angle)
 		right_tree.rotate_x(Globals.slope_angle)
 		trees.append(left_tree)
@@ -169,26 +194,11 @@ func generate_initial_obstacles() -> void:
 		add_child(right_tree)
 		i += tree_size
 
-func start() -> void:
-	game_started = true
-	# Start moving player
-	player.move = true
-	# Do similar for flags
-	for flag in flags:
-		flag.velocity = -player.downhill_vel
-	# Do similar for fences
-	for fence in fences:
-		fence.velocity = -player.downhill_vel
-	# Reset score
-	score = 0
-	score_counter.text = '0'
-	score_timer.start()
-	# Hide title elements
-	title.visible = false
-	instruction.visible = false
-	return
-
 func _on_player_death() -> void:
+	# Check player isn't already dead and game has actually started
+	if !game_started:
+		return
+#	print('Dead')
 	game_started = false
 	first_time = false
 	# Stop everything
@@ -211,8 +221,10 @@ func _on_timeout() -> void:
 	score_counter.text = str(score)
 
 func _process(delta: float) -> void:
+	# Display fps
+	fps_counter.text = str(Engine.get_frames_per_second()) + ' fps'
 	# Check player hasn't died yet and game has actually started
-	if !is_instance_valid(player) or !game_started:
+	if !game_started:
 		return
 	# Keep track of distance traveled
 	dist_traveled += player.downhill_vel.length() * delta
@@ -224,7 +236,6 @@ func _process(delta: float) -> void:
 		# Give random horizontal offset
 		rock.transform.origin += Vector3.RIGHT * rand.randi_range(-width / 2 + rock_margin, width / 2 - rock_margin)
 		# Finish generating
-		rock.velocity = -player.downhill_vel
 		rock.connect('death', self, '_on_player_death')
 		rocks.append(rock)
 		add_child(rock)
@@ -238,7 +249,6 @@ func _process(delta: float) -> void:
 			flag.transform.origin += Vector3.RIGHT * rand.randi_range(-width / 2 + flag_margin, 0)
 		else:
 			flag.transform.origin += Vector3.RIGHT * rand.randi_range(0, width / 2 - flag_margin)
-		flag.velocity = -player.downhill_vel
 		flag.connect('death', self, '_on_player_death')
 		flags.append(flag)
 		add_child(flag)
@@ -250,8 +260,6 @@ func _process(delta: float) -> void:
 		var right_fence: KinematicBody = fence_scene.instance()
 		left_fence.transform.origin = Globals.downhill * (obstacle_offset_dist - (dist_traveled - next_fence_dist)) - Vector3.RIGHT * width / 2
 		right_fence.transform.origin = Globals.downhill * (obstacle_offset_dist - (dist_traveled - next_fence_dist)) + Vector3.RIGHT * width / 2
-		left_fence.velocity = -player.downhill_vel
-		right_fence.velocity = -player.downhill_vel
 		left_fence.connect('death', self, '_on_player_death')
 		right_fence.connect('death', self, '_on_player_death')
 		fences.append(left_fence)
@@ -263,8 +271,8 @@ func _process(delta: float) -> void:
 	if dist_traveled >= next_tree_dist:
 		var left_tree: Spatial = tree_scene.instance()
 		var right_tree: Spatial = tree_scene.instance()
-		left_tree.transform.origin = Globals.downhill * (obstacle_offset_dist - (dist_traveled - next_tree_dist)) - Vector3.RIGHT * (width / 2 + tree_margin)
-		right_tree.transform.origin = Globals.downhill * (obstacle_offset_dist - (dist_traveled - next_tree_dist)) + Vector3.RIGHT * (width / 2 + tree_margin)
+		left_tree.transform.origin = Globals.downhill * (obstacle_offset_dist - (dist_traveled - next_tree_dist) + rand.randi_range(-tree_variance, tree_variance)) - Vector3.RIGHT * (width / 2 + tree_margin)
+		right_tree.transform.origin = Globals.downhill * (obstacle_offset_dist - (dist_traveled - next_tree_dist) + rand.randi_range(-tree_variance, tree_variance)) + Vector3.RIGHT * (width / 2 + tree_margin)
 		left_tree.rotate_x(Globals.slope_angle)
 		right_tree.rotate_x(Globals.slope_angle)
 		trees.append(left_tree)
@@ -309,6 +317,4 @@ func _process(delta: float) -> void:
 	for tree in trees_to_delete:
 		trees.erase(tree)
 		tree.queue_free()
-	# Display fps
-	fps_counter.text = str(Engine.get_frames_per_second()) + ' fps'
 	

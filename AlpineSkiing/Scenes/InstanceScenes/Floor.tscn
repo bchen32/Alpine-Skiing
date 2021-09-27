@@ -1,7 +1,7 @@
 [gd_scene load_steps=2 format=2]
 
 [sub_resource type="PlaneMesh" id=1]
-size = Vector2( 10000, 1000 )
+size = Vector2( 10000, 2000 )
 
 [node name="Floor" type="Spatial"]
 

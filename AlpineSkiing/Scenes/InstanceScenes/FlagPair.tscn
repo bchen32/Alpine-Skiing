@@ -11,10 +11,10 @@ collision_layer = 2
 script = ExtResource( 2 )
 
 [node name="LeftFlag" parent="." instance=ExtResource( 1 )]
-transform = Transform( 5, 0, 0, 0, 5, 0, 0, 0, 5, -10, 0, 0 )
+transform = Transform( 10, 0, 0, 0, 10, 0, 0, 0, 10, -10, 0, 0 )
 
 [node name="RightFlag" parent="." instance=ExtResource( 1 )]
-transform = Transform( 5, 0, 0, 0, 5, 0, 0, 0, 5, 10, 0, 0 )
+transform = Transform( 10, 0, 0, 0, 10, 0, 0, 0, 10, 10, 0, 0 )
 
 [node name="LeftCollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -110, 1, 0 )
