@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="PlaneMesh" id=1]
+
+[node name="Hill" type="Spatial"]
+
+[node name="Hill" type="MeshInstance" parent="."]
+transform = Transform( 500, 0, 0, 0, 0.866025, 250, 0, -0.5, 433.013, 0, 0, 0 )
+mesh = SubResource( 1 )
+material/0 = null
